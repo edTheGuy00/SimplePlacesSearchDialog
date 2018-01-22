@@ -77,17 +77,17 @@ class PlaceAutocompleteAdapter(private val context: Context,
             secondaryText.text = secondary
 
             itemView.setOnClickListener {
-                getLatLng(primary, placeId)
+                getLatLng(placeId)
             }
         }
 
-        fun getLatLng(name: String, placeId: String){
+        fun getLatLng(placeId: String){
             val placeBufferResults : PendingResult<PlaceBuffer> = Places.GeoDataApi
                     .getPlaceById(googleApiClient, placeId)
 
             placeBufferResults.setResultCallback {
                 if (it.count == 1){
-                    callback.onPlaceSelected(name, it[0].latLng)
+                    callback.onPlaceSelected(it[0])
                 } else {
                     callback.onError()
                 }

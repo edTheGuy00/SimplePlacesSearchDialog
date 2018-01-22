@@ -1,6 +1,7 @@
 package com.taskail.googleplacessearchdialog
 
 import android.content.Context
+import android.content.DialogInterface
 import android.os.Bundle
 import android.support.v7.app.AppCompatDialog
 import android.support.v7.widget.AppCompatEditText
@@ -10,10 +11,13 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.View
+import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.location.places.AutocompletePrediction
+import com.google.android.gms.location.places.Place
 import com.google.android.gms.location.places.Places
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
@@ -38,19 +42,18 @@ class SimplePlacesSearchDialog(private val mContext: Context,
     private var recyclerView: RecyclerView? = null
 
     interface LocationSelectedCallback{
-        fun onLocationSelected(locationName: String,
-                               locationLat: Double,
-                               locationLng: Double)
+        fun onLocationSelected(place: Place)
     }
 
-    override fun onPlaceSelected(placeName: String, latLng: LatLng) {
-        val lat = latLng.latitude
-        val lng = latLng.longitude
-        builder.locationSelectedListener?.onLocationSelected(placeName, lat, lng)
+    override fun onPlaceSelected(place: Place) {
+        builder.locationSelectedListener?.onLocationSelected(place)
+
+        hideKeyboard()
+        this.dismiss()
     }
 
     override fun onError() {
-
+        Toast.makeText(mContext, "Something went wrong", Toast.LENGTH_SHORT).show()
     }
 
 
@@ -67,12 +70,11 @@ class SimplePlacesSearchDialog(private val mContext: Context,
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val imm = mContext.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
         val background : View? = findViewById(R.id.touchable_background)
+        showKeyboard()
         background?.setOnClickListener {
             dismiss()
-            imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0)
+            hideKeyboard()
         }
 
         googleApiClient = GoogleApiClient.Builder(context)
@@ -126,6 +128,14 @@ class SimplePlacesSearchDialog(private val mContext: Context,
             googleApiClient.disconnect()
         }
         super.onStop()
+    }
+
+    private fun showKeyboard(){
+        this.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
+    }
+
+    private fun hideKeyboard(){
+        this.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
     }
 
     override fun onConnected(p0: Bundle?) {
