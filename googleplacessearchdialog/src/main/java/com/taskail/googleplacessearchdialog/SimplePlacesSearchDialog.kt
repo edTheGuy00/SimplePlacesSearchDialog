@@ -28,7 +28,7 @@ import com.google.android.gms.maps.model.LatLngBounds
  *Created by ed on 1/21/18.
  */
 class SimplePlacesSearchDialog(private val mContext: Context,
-                               private var builder: PlacesSearchDialogBuilder) :
+                               private var builder: SimplePlacesSearchDialogBuilder) :
         AppCompatDialog(mContext), GoogleApiClient.OnConnectionFailedListener,
         GoogleApiClient.ConnectionCallbacks, PlaceCallback {
 

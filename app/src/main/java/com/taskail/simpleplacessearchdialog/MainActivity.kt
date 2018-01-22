@@ -7,7 +7,7 @@ import com.google.android.gms.location.places.Place
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.taskail.googleplacessearchdialog.SimplePlacesSearchDialog
-import com.taskail.googleplacessearchdialog.PlacesSearchDialogBuilder
+import com.taskail.googleplacessearchdialog.SimplePlacesSearchDialogBuilder
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -20,11 +20,10 @@ class MainActivity : AppCompatActivity() {
 
 
         locationBtn.setOnClickListener {
-            PlacesSearchDialogBuilder(this)
+            SimplePlacesSearchDialogBuilder(this)
                     //Filter for cities only
                     .setResultsFilter(AutocompleteFilter.TYPE_FILTER_CITIES)
                     // enter a custom hint
-                    .setSearchHint("My Custom Hint")
                     // enter bounds, Mountain View California in this case
                     .setLatLngBounds(MT_VIEW_CALIFORNIA)
                     //set the place selected callback

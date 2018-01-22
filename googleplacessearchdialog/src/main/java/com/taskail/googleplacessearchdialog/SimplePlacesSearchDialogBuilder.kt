@@ -7,7 +7,7 @@ import com.google.android.gms.maps.model.LatLngBounds
 /**
  *Created by ed on 1/21/18.
  */
-open class PlacesSearchDialogBuilder(private val context: Context) {
+open class SimplePlacesSearchDialogBuilder(private val context: Context) {
 
     private val CITIES = AutocompleteFilter.TYPE_FILTER_CITIES
     private val ESTABLISHMENTS = AutocompleteFilter.TYPE_FILTER_ESTABLISHMENT
@@ -21,7 +21,7 @@ open class PlacesSearchDialogBuilder(private val context: Context) {
     internal var locationSelectedListener: SimplePlacesSearchDialog.PlaceSelectedCallback? = null
 
 
-    fun setLatLngBounds(latLngBounds: LatLngBounds) : PlacesSearchDialogBuilder {
+    fun setLatLngBounds(latLngBounds: LatLngBounds) : SimplePlacesSearchDialogBuilder {
         this.latLngBounds = latLngBounds
         return this
     }
@@ -29,7 +29,7 @@ open class PlacesSearchDialogBuilder(private val context: Context) {
     /**
      * The autocomplete filter used to restrict queries to a specific set of place types.
      */
-    fun setResultsFilter(filter: Int): PlacesSearchDialogBuilder{
+    fun setResultsFilter(filter: Int): SimplePlacesSearchDialogBuilder {
 
         when(filter) {
             CITIES -> {
@@ -56,13 +56,13 @@ open class PlacesSearchDialogBuilder(private val context: Context) {
         return this
     }
 
-    fun setSearchHint(hint: String): PlacesSearchDialogBuilder{
+    fun setSearchHint(hint: String): SimplePlacesSearchDialogBuilder {
         this.customSearchHint = hint
         return this
     }
 
     fun setLocationListener(locationSelectedCallback: SimplePlacesSearchDialog.PlaceSelectedCallback) :
-            PlacesSearchDialogBuilder {
+            SimplePlacesSearchDialogBuilder {
         this.locationSelectedListener = locationSelectedCallback
         return this
     }
