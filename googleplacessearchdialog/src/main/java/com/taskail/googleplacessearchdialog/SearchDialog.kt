@@ -23,5 +23,6 @@ class SearchDialog(context: Context,
 
     init {
         setContentView(R.layout.dialog_simple_search)
+        window.setBackgroundDrawableResource(android.R.color.transparent)
     }
 }
