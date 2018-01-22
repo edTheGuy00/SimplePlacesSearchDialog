@@ -8,7 +8,8 @@ import java.util.ArrayList
  *Created by ed on 1/21/18.
  */
 class SimpleSearchFilter(private var resultList: ArrayList<AutocompletePrediction>,
-                         private val placesPrediction: GoogleAutoCompletePredictions) : Filter() {
+                         private val placesPrediction: GoogleAutoCompletePredictions,
+                         private val callbacks: FilterCallbacks) : Filter() {
 
     override fun performFiltering(p0: CharSequence?): FilterResults {
         val results = FilterResults()
@@ -28,7 +29,13 @@ class SimpleSearchFilter(private var resultList: ArrayList<AutocompletePredictio
     }
 
     override fun publishResults(p0: CharSequence?, p1: FilterResults?) {
-
+        if (p1 != null && p1.count > 0) {
+            // The API returned at least one result, update the data.
+            callbacks.publishResults()
+        } else {
+            // The API did not return any results, invalidate the data set.
+            callbacks.noResultsReturned()
+        }
     }
 
     override fun convertResultToString(resultValue: Any?): CharSequence {

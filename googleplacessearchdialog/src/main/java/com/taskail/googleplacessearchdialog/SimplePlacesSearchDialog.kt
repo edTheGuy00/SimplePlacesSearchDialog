@@ -3,10 +3,15 @@ package com.taskail.googleplacessearchdialog
 import android.content.Context
 import android.os.Bundle
 import android.support.v7.app.AppCompatDialog
+import android.support.v7.widget.AppCompatEditText
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.GoogleApiClient
+import com.google.android.gms.location.places.AutocompletePrediction
 import com.google.android.gms.location.places.Places
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
@@ -14,13 +19,17 @@ import com.google.android.gms.maps.model.LatLngBounds
 /**
  *Created by ed on 1/21/18.
  */
-class SimplePlacesSearchDialog(context: Context,
-                               private val builder: PlacesSearchDialogBuilder) :
-        AppCompatDialog(context), GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
+class SimplePlacesSearchDialog(private val mContext: Context,
+                               private var builder: PlacesSearchDialogBuilder) :
+        AppCompatDialog(mContext), GoogleApiClient.OnConnectionFailedListener,
+        GoogleApiClient.ConnectionCallbacks, FilterCallbacks {
 
-    val tag = "Places Search Dialog"
+
+    private val tag = "Places Search Dialog"
     // Bounds of the world
     private var BOUNDS_WORLD = LatLngBounds(LatLng(-85.0, 180.0), LatLng(85.0, -180.0))
+
+    private var list = ArrayList<AutocompletePrediction>()
 
     private lateinit var googleApiClient: GoogleApiClient
 
@@ -33,12 +42,21 @@ class SimplePlacesSearchDialog(context: Context,
     init {
         setContentView(R.layout.dialog_simple_search)
         window.setBackgroundDrawableResource(android.R.color.transparent)
+
+        if (builder.latLngBounds != null) {
+            BOUNDS_WORLD = builder.latLngBounds!!
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val imm = mContext.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
         val background : View? = findViewById(R.id.touchable_background)
-        background?.setOnClickListener { dismiss() }
+        background?.setOnClickListener {
+            dismiss()
+            imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0)
+        }
 
         googleApiClient = GoogleApiClient.Builder(context)
                 .addApi(Places.GEO_DATA_API)
@@ -50,6 +68,34 @@ class SimplePlacesSearchDialog(context: Context,
 
     private fun initDialog(){
 
+        val autoCompletePredictions = GoogleAutoCompletePredictions(googleApiClient, BOUNDS_WORLD, mContext)
+        val filter = SimpleSearchFilter(list, autoCompletePredictions, this)
+
+        getInputET().addTextChangedListener(object : TextWatcher{
+            override fun afterTextChanged(p0: Editable?) {
+
+            }
+
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                filter.filter(p0)
+            }
+
+        })
+
+    }
+
+    override fun publishResults() {
+
+    }
+
+    override fun noResultsReturned() {
+    }
+
+    private fun getInputET() : AppCompatEditText{
+        return findViewById(R.id.search_edit_text)!!
     }
 
     override fun onStart() {

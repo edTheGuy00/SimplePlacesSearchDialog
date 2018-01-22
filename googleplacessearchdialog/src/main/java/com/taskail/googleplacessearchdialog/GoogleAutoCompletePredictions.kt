@@ -19,18 +19,22 @@ import java.util.concurrent.TimeUnit
 class GoogleAutoCompletePredictions(
         private val googleApiClient: GoogleApiClient,
         private val latLngBounds: LatLngBounds,
-        private val placeFilter: AutocompleteFilter,
         private val context: Context) {
 
     fun getAutocompletePredictions(constraint: CharSequence): ArrayList<AutocompletePrediction>? {
         if (googleApiClient.isConnected) {
             Log.i("DialogAdapter", "Starting autocomplete query for: " + constraint)
 
+            val filter = AutocompleteFilter
+                    .Builder()
+                    .setTypeFilter(AutocompleteFilter.TYPE_FILTER_NONE)
+                    .build()
+
             // Submit the query to the autocomplete API and retrieve a PendingResult that will
             // contain the results when the query completes.
             val results = Places.GeoDataApi
                     .getAutocompletePredictions(googleApiClient, constraint.toString(),
-                            latLngBounds, placeFilter)
+                            latLngBounds, filter)
 
             // This method should have been called off the main UI thread. Block and wait for at most 60s
             // for a result from the API.

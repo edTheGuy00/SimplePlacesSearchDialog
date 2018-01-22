@@ -7,19 +7,13 @@ import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.google.android.gms.common.api.GoogleApiClient
-import com.google.android.gms.location.places.AutocompleteFilter
 import com.google.android.gms.location.places.AutocompletePrediction
-import com.google.android.gms.maps.model.LatLngBounds
 import java.util.ArrayList
 
 /**
  *Created by ed on 1/21/18.
  */
-class PlacesAdapter(private val context: Context,
-                    private val googleApiClient: GoogleApiClient,
-                    private val latLngBounds: LatLngBounds,
-                    private val placeFilter: AutocompleteFilter) :
+class PlacesAdapter(private val context: Context) :
         RecyclerView.Adapter<PlacesAdapter.PlacesViewHolder>() {
 
     private val STYLE_BOLD = StyleSpan(Typeface.BOLD)
