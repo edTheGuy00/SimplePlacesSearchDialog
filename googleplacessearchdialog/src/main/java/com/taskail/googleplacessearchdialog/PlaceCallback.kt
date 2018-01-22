@@ -9,5 +9,7 @@ interface PlaceCallback {
 
     fun onLoading(showLoading: Boolean)
     fun onPlaceSelected(place: Place)
+    fun onNoResultsReturned()
+    fun resultsReturned()
     fun onError()
 }

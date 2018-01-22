@@ -13,10 +13,12 @@ import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.widget.FrameLayout
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.Toast
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.GoogleApiClient
+import com.google.android.gms.location.places.AutocompleteFilter
 import com.google.android.gms.location.places.Place
 import com.google.android.gms.location.places.Places
 import com.google.android.gms.maps.model.LatLng
@@ -32,8 +34,6 @@ class SimplePlacesSearchDialog(private val mContext: Context,
 
 
     private val tag = "Places Search Dialog"
-    // Bounds of the world
-    private var BOUNDS_WORLD = LatLngBounds(LatLng(-85.0, 180.0), LatLng(85.0, -180.0))
 
     private val THRESH_HOLD = 1
 
@@ -41,15 +41,24 @@ class SimplePlacesSearchDialog(private val mContext: Context,
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var recyclerFrame: FrameLayout
+    private lateinit var noResultsLayout: LinearLayout
     private lateinit var loadingIndicator: ProgressBar
     private lateinit var mHandler: Handler
+    private var searchHint: String
+    private var searchFilter: AutocompleteFilter
+    private var BOUNDS: LatLngBounds
 
-    interface LocationSelectedCallback{
-        fun onLocationSelected(place: Place)
+    interface PlaceSelectedCallback {
+        fun onPlaceSelected(place: Place)
     }
 
     override fun onPlaceSelected(place: Place) {
-        builder.locationSelectedListener?.onLocationSelected(place)
+        if (builder.locationSelectedListener != null) {
+            builder.locationSelectedListener?.onPlaceSelected(place)
+        } else {
+            Log.e(tag, "No Callback Implemented, Here's a Toast")
+            Toast.makeText(mContext, place.name, Toast.LENGTH_SHORT).show()
+        }
 
         hideKeyboard()
         this.dismiss()
@@ -59,13 +68,49 @@ class SimplePlacesSearchDialog(private val mContext: Context,
         Toast.makeText(mContext, "Something went wrong", Toast.LENGTH_SHORT).show()
     }
 
+    override fun onNoResultsReturned() {
+        noResultsLayout.visibility = View.VISIBLE
+    }
+
+    override fun resultsReturned() {
+        hideNoResultsLayout()
+    }
+
+    private fun hideNoResultsLayout(){
+        if (isVisible(noResultsLayout)){
+            noResultsLayout.visibility = View.GONE
+        }
+    }
+
+    private fun isVisible(view: View): Boolean{
+        return view.visibility != View.GONE
+    }
 
     init {
         setContentView(R.layout.dialog_simple_search)
         window.setBackgroundDrawableResource(android.R.color.transparent)
 
-        if (builder.latLngBounds != null) {
-            BOUNDS_WORLD = builder.latLngBounds!!
+        if (builder.latLngBounds != null){
+            Log.d(tag, "bounds set")
+        }
+
+        BOUNDS = if (builder.latLngBounds != null) {
+            builder.latLngBounds!!
+        } else {
+            // Bounds of the world
+            LatLngBounds(LatLng(-85.0, 180.0), LatLng(85.0, -180.0))
+        }
+
+        searchHint = if (builder.customSearchHint != null){
+            builder.customSearchHint!!
+        } else{
+            builder.searchHint
+        }
+
+        searchFilter = if (builder.searchFilterType != null){
+            AutocompleteFilter.Builder().setTypeFilter(builder.searchFilterType!!).build()
+        } else {
+            AutocompleteFilter.Builder().setTypeFilter(AutocompleteFilter.TYPE_FILTER_NONE).build()
         }
     }
 
@@ -74,9 +119,12 @@ class SimplePlacesSearchDialog(private val mContext: Context,
         val background : View? = findViewById(R.id.touchable_background)
         showKeyboard()
 
+        getInputET().hint = searchHint
+
         recyclerView = findViewById(R.id.recyclerView)!!
         recyclerFrame = findViewById(R.id.recyclerFrame)!!
         loadingIndicator = findViewById(R.id.loadingIndicator)!!
+        noResultsLayout = findViewById(R.id.noResultsLayout)!!
         mHandler = Handler()
 
         background?.setOnClickListener {
@@ -97,10 +145,10 @@ class SimplePlacesSearchDialog(private val mContext: Context,
         mHandler.post {
             if(showLoading){
                 loadingIndicator.visibility = View.VISIBLE
-                recyclerView.visibility = View.GONE
+                recyclerFrame.visibility = View.GONE
             } else{
                 loadingIndicator.visibility = View.GONE
-                recyclerView.visibility = View.VISIBLE
+                recyclerFrame.visibility = View.VISIBLE
             }
         }
 
@@ -110,9 +158,9 @@ class SimplePlacesSearchDialog(private val mContext: Context,
 
         val adapter = PlaceAutocompleteAdapter(mContext,
                 googleApiClient,
-                BOUNDS_WORLD,
+                BOUNDS,
                 this,
-                builder.searchFilter)
+                searchFilter)
 
         recyclerView.layoutManager = LinearLayoutManager(context,
                 LinearLayoutManager.VERTICAL, false)

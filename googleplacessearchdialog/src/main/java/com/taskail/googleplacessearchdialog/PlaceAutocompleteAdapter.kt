@@ -154,9 +154,11 @@ class PlaceAutocompleteAdapter(private val context: Context,
                 if (results != null && results.count > 0) {
                     // The API returned at least one result, update the data.
                     notifyDataSetChanged()
+                    callback.resultsReturned()
                 } else {
                     // The API did not return any results, invalidate the data set.
                     //notifyDataSetChanged()
+                    callback.onNoResultsReturned()
                 }
 
                 callback.onLoading(false)

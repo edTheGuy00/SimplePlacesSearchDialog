@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">Google Places Search Dialog</string>
-    <string name="search_hint">Enter Location</string>
+    <string name="search_hint">Enter Location....</string>
+    <string name="search_city_hint">Enter City....</string>
+    <string name="search_establishment_hint">Enter Establishment....</string>
+    <string name="search_address_hint">Enter Address....</string>
+    <string name="nothing_found">Nothing Found</string>
 </resources>

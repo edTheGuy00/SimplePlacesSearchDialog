@@ -31,7 +31,6 @@
             <android.support.v7.widget.AppCompatEditText
                 android:id="@+id/search_edit_text"
                 android:layout_width="0dp"
-                android:hint="@string/search_hint"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="12dp"
@@ -39,6 +38,13 @@
                 android:background="@android:color/transparent"
                 android:textSize="14sp"
                 android:layout_marginStart="12dp" />
+
+            <ProgressBar
+                android:id="@+id/loadingIndicator"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center_horizontal"
+                android:visibility="gone"/>
 
             <android.support.v7.widget.AppCompatImageView
                 android:layout_width="24dp"
@@ -56,14 +62,27 @@
             android:layout_height="1dp"
             android:background="#eaeaea"/>
 
-        <ProgressBar
-            android:id="@+id/loadingIndicator"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="12dp"
+        <LinearLayout
+            android:id="@+id/noResultsLayout"
+            android:layout_width="wrap_content"
             android:layout_marginTop="12dp"
-            android:visibility="gone"/>
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:layout_marginBottom="12dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_location_off_black_24dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/nothing_found"/>
+        </LinearLayout>
 
         <!-- wrap recycler view in frame layout as there is a conflict
         with the parents layout animateLayoutChanges :
@@ -82,6 +101,7 @@
                 android:layout_marginBottom="4dp"/>
 
         </FrameLayout>
+
 
     </LinearLayout>
 

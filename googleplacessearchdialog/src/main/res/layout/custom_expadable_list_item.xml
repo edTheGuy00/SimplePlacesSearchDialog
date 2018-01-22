@@ -19,6 +19,7 @@
     android:layout_height="wrap_content"
     android:paddingTop="2dip"
     android:paddingBottom="2dip"
+    android:foreground="?selectableItemBackgroundBorderless"
     android:paddingStart="?android:attr/expandableListPreferredItemPaddingLeft"
     android:paddingEnd="?android:attr/expandableListPreferredItemIndicatorRight"
     android:mode="twoLine"

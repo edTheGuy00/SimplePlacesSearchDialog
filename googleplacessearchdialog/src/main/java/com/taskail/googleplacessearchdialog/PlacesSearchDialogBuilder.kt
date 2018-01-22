@@ -14,12 +14,11 @@ open class PlacesSearchDialogBuilder(private val context: Context) {
     private val ADDRESSES = AutocompleteFilter.TYPE_FILTER_ADDRESS
     private val REGION = AutocompleteFilter.TYPE_FILTER_REGIONS
 
-    private var searchFilterType = AutocompleteFilter.TYPE_FILTER_NONE
-
+    internal var searchFilterType: Int? = null
     internal var searchHint: String = context.getString(R.string.search_hint)
+    internal var customSearchHint: String? = null
     internal var latLngBounds: LatLngBounds? = null
-    internal var locationSelectedListener: SimplePlacesSearchDialog.LocationSelectedCallback? = null
-    internal var searchFilter: AutocompleteFilter = AutocompleteFilter.Builder().setTypeFilter(searchFilterType).build()
+    internal var locationSelectedListener: SimplePlacesSearchDialog.PlaceSelectedCallback? = null
 
 
     fun setLatLngBounds(latLngBounds: LatLngBounds) : PlacesSearchDialogBuilder {
@@ -33,11 +32,21 @@ open class PlacesSearchDialogBuilder(private val context: Context) {
     fun setResultsFilter(filter: Int): PlacesSearchDialogBuilder{
 
         when(filter) {
-            CITIES -> this.searchFilterType = CITIES
+            CITIES -> {
+                this.searchFilterType = CITIES
+                searchHint = context.getString(R.string.search_city_hint)
+            }
 
-            ESTABLISHMENTS -> this.searchFilterType = ESTABLISHMENTS
 
-            ADDRESSES -> this.searchFilterType = ADDRESSES
+            ESTABLISHMENTS -> {
+                this.searchFilterType = ESTABLISHMENTS
+                searchHint = context.getString(R.string.search_establishment_hint)
+            }
+
+            ADDRESSES -> {
+                this.searchFilterType = ADDRESSES
+                searchHint = context.getString(R.string.search_address_hint)
+            }
 
             REGION -> this.searchFilterType = REGION
 
@@ -47,7 +56,12 @@ open class PlacesSearchDialogBuilder(private val context: Context) {
         return this
     }
 
-    fun setLocationListener(locationSelectedCallback: SimplePlacesSearchDialog.LocationSelectedCallback) :
+    fun setSearchHint(hint: String): PlacesSearchDialogBuilder{
+        this.customSearchHint = hint
+        return this
+    }
+
+    fun setLocationListener(locationSelectedCallback: SimplePlacesSearchDialog.PlaceSelectedCallback) :
             PlacesSearchDialogBuilder {
         this.locationSelectedListener = locationSelectedCallback
         return this
