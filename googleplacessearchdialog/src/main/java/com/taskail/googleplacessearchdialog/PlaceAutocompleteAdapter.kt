@@ -30,10 +30,13 @@ import android.widget.Filterable
 import android.widget.TextView
 import android.widget.Toast
 import com.google.android.gms.common.api.GoogleApiClient
+import com.google.android.gms.common.api.PendingResult
 import com.google.android.gms.common.data.DataBufferUtils
 import com.google.android.gms.location.places.AutocompleteFilter
 import com.google.android.gms.location.places.AutocompletePrediction
+import com.google.android.gms.location.places.PlaceBuffer
 import com.google.android.gms.location.places.Places
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import java.util.ArrayList
 import java.util.concurrent.TimeUnit
@@ -50,6 +53,7 @@ import java.util.concurrent.TimeUnit
 class PlaceAutocompleteAdapter(private val context: Context,
                                private val googleApiClient: GoogleApiClient,
                                private val latLngBounds: LatLngBounds,
+                               private val callback: PlaceCallback,
                                private val  mPlaceFilter: AutocompleteFilter) :
         RecyclerView.Adapter<PlaceAutocompleteAdapter.PlacesViewHolder>(), Filterable {
 
@@ -60,22 +64,35 @@ class PlaceAutocompleteAdapter(private val context: Context,
      */
     private var mResultList: ArrayList<AutocompletePrediction>? = null
 
-    class PlacesViewHolder(itemView: View) :
+    class PlacesViewHolder(itemView: View,
+                           val callback: PlaceCallback,
+                           val googleApiClient: GoogleApiClient) :
             RecyclerView.ViewHolder(itemView){
 
         val primaryText = itemView.rootView.findViewById<TextView>(android.R.id.text1)
         val secondaryText = itemView.rootView.findViewById<TextView>(android.R.id.text2)
 
-
-        fun setPlace(primary: String, secondary: String){
+        fun setPlace(primary: String, secondary: String, placeId: String){
             primaryText.text = primary
             secondaryText.text = secondary
 
             itemView.setOnClickListener {
-                Log.d("Click", "Click")
+                getLatLng(primary, placeId)
             }
         }
 
+        fun getLatLng(name: String, placeId: String){
+            val placeBufferResults : PendingResult<PlaceBuffer> = Places.GeoDataApi
+                    .getPlaceById(googleApiClient, placeId)
+
+            placeBufferResults.setResultCallback {
+                if (it.count == 1){
+                    callback.onPlaceSelected(name, it[0].latLng)
+                } else {
+                    callback.onError()
+                }
+            }
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): PlaceAutocompleteAdapter.PlacesViewHolder {
@@ -83,11 +100,11 @@ class PlaceAutocompleteAdapter(private val context: Context,
                 .inflate(android.R.layout.simple_expandable_list_item_2,
                         parent, false)
 
-        return PlaceAutocompleteAdapter.PlacesViewHolder(itemView)
+        return PlaceAutocompleteAdapter.PlacesViewHolder(itemView, callback, googleApiClient)
     }
 
     override fun onBindViewHolder(holder: PlaceAutocompleteAdapter.PlacesViewHolder?, position: Int) {
-        holder?.setPlace(getPrimaryString(position), getSecondayString(position))
+        holder?.setPlace(getPrimaryString(position), getSecondaryString(position), getPlaceId(position))
 
     }
 
@@ -95,8 +112,12 @@ class PlaceAutocompleteAdapter(private val context: Context,
         return mResultList!![position].getPrimaryText(STYLE_BOLD).toString()
     }
 
-    private fun getSecondayString(position: Int) : String{
+    private fun getSecondaryString(position: Int) : String{
         return mResultList!![position].getSecondaryText(STYLE_BOLD).toString()
+    }
+
+    private fun getPlaceId(position: Int) : String {
+       return mResultList!![position].placeId!!
     }
 
     override fun getItemCount(): Int {

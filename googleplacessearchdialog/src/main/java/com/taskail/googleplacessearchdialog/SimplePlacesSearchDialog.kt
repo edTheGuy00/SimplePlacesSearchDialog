@@ -24,7 +24,7 @@ import com.google.android.gms.maps.model.LatLngBounds
 class SimplePlacesSearchDialog(private val mContext: Context,
                                private var builder: PlacesSearchDialogBuilder) :
         AppCompatDialog(mContext), GoogleApiClient.OnConnectionFailedListener,
-        GoogleApiClient.ConnectionCallbacks {
+        GoogleApiClient.ConnectionCallbacks, PlaceCallback {
 
 
     private val tag = "Places Search Dialog"
@@ -33,19 +33,26 @@ class SimplePlacesSearchDialog(private val mContext: Context,
 
     private var THRESH_HOLD = 2
 
-    private var list = ArrayList<AutocompletePrediction>()
-
     private lateinit var googleApiClient: GoogleApiClient
 
     private var recyclerView: RecyclerView? = null
-
-
 
     interface LocationSelectedCallback{
         fun onLocationSelected(locationName: String,
                                locationLat: Double,
                                locationLng: Double)
     }
+
+    override fun onPlaceSelected(placeName: String, latLng: LatLng) {
+        val lat = latLng.latitude
+        val lng = latLng.longitude
+        builder.locationSelectedListener?.onLocationSelected(placeName, lat, lng)
+    }
+
+    override fun onError() {
+
+    }
+
 
     init {
         setContentView(R.layout.dialog_simple_search)
@@ -78,7 +85,11 @@ class SimplePlacesSearchDialog(private val mContext: Context,
 
     private fun initDialog(){
 
-        val adapter = PlaceAutocompleteAdapter(mContext, googleApiClient, BOUNDS_WORLD, builder.searchFilter)
+        val adapter = PlaceAutocompleteAdapter(mContext,
+                googleApiClient,
+                BOUNDS_WORLD,
+                this,
+                builder.searchFilter)
 
         recyclerView?.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
 
