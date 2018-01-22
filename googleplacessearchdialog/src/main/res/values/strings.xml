@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Google Places Search Dialog</string>
+    <string name="search_hint">Enter Location</string>
 </resources>
