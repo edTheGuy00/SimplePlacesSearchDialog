@@ -1,7 +1,9 @@
 package com.taskail.googleplacessearchdialog
 
 import android.content.Context
+import android.os.Bundle
 import android.support.v7.app.AppCompatDialog
+import android.view.View
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 
@@ -24,5 +26,15 @@ class SearchDialog(context: Context,
     init {
         setContentView(R.layout.dialog_simple_search)
         window.setBackgroundDrawableResource(android.R.color.transparent)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val background : View? = findViewById(R.id.touchable_background)
+        background?.setOnClickListener {
+            dismiss()
+        }
+
+
     }
 }
