@@ -1,8 +1,8 @@
 package com.taskail.googleplacessearchdialog
 
 import android.content.Context
-import android.content.DialogInterface
 import android.os.Bundle
+import android.os.Handler
 import android.support.v7.app.AppCompatDialog
 import android.support.v7.widget.AppCompatEditText
 import android.support.v7.widget.LinearLayoutManager
@@ -12,11 +12,11 @@ import android.text.TextWatcher
 import android.util.Log
 import android.view.View
 import android.view.WindowManager
-import android.view.inputmethod.InputMethodManager
+import android.widget.FrameLayout
+import android.widget.ProgressBar
 import android.widget.Toast
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.GoogleApiClient
-import com.google.android.gms.location.places.AutocompletePrediction
 import com.google.android.gms.location.places.Place
 import com.google.android.gms.location.places.Places
 import com.google.android.gms.maps.model.LatLng
@@ -35,11 +35,14 @@ class SimplePlacesSearchDialog(private val mContext: Context,
     // Bounds of the world
     private var BOUNDS_WORLD = LatLngBounds(LatLng(-85.0, 180.0), LatLng(85.0, -180.0))
 
-    private var THRESH_HOLD = 2
+    private val THRESH_HOLD = 1
 
     private lateinit var googleApiClient: GoogleApiClient
 
-    private var recyclerView: RecyclerView? = null
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var recyclerFrame: FrameLayout
+    private lateinit var loadingIndicator: ProgressBar
+    private lateinit var mHandler: Handler
 
     interface LocationSelectedCallback{
         fun onLocationSelected(place: Place)
@@ -61,8 +64,6 @@ class SimplePlacesSearchDialog(private val mContext: Context,
         setContentView(R.layout.dialog_simple_search)
         window.setBackgroundDrawableResource(android.R.color.transparent)
 
-        recyclerView = findViewById(R.id.recyclerView)
-
         if (builder.latLngBounds != null) {
             BOUNDS_WORLD = builder.latLngBounds!!
         }
@@ -72,6 +73,12 @@ class SimplePlacesSearchDialog(private val mContext: Context,
         super.onCreate(savedInstanceState)
         val background : View? = findViewById(R.id.touchable_background)
         showKeyboard()
+
+        recyclerView = findViewById(R.id.recyclerView)!!
+        recyclerFrame = findViewById(R.id.recyclerFrame)!!
+        loadingIndicator = findViewById(R.id.loadingIndicator)!!
+        mHandler = Handler()
+
         background?.setOnClickListener {
             dismiss()
             hideKeyboard()
@@ -85,6 +92,20 @@ class SimplePlacesSearchDialog(private val mContext: Context,
 
     }
 
+    override fun onLoading(showLoading: Boolean) {
+
+        mHandler.post {
+            if(showLoading){
+                loadingIndicator.visibility = View.VISIBLE
+                recyclerView.visibility = View.GONE
+            } else{
+                loadingIndicator.visibility = View.GONE
+                recyclerView.visibility = View.VISIBLE
+            }
+        }
+
+    }
+
     private fun initDialog(){
 
         val adapter = PlaceAutocompleteAdapter(mContext,
@@ -93,17 +114,15 @@ class SimplePlacesSearchDialog(private val mContext: Context,
                 this,
                 builder.searchFilter)
 
-        recyclerView?.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+        recyclerView.layoutManager = LinearLayoutManager(context,
+                LinearLayoutManager.VERTICAL, false)
 
-        recyclerView?.adapter = adapter
+        recyclerView.adapter = adapter
 
         getInputET().addTextChangedListener(object : TextWatcher{
-            override fun afterTextChanged(p0: Editable?) {
+            override fun afterTextChanged(p0: Editable?) {}
 
-            }
-
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-            }
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
                 if(p0!!.length > THRESH_HOLD)

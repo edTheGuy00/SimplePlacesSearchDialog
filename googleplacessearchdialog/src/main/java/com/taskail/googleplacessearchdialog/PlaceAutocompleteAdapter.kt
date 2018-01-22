@@ -36,7 +36,6 @@ import com.google.android.gms.location.places.AutocompleteFilter
 import com.google.android.gms.location.places.AutocompletePrediction
 import com.google.android.gms.location.places.PlaceBuffer
 import com.google.android.gms.location.places.Places
-import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import java.util.ArrayList
 import java.util.concurrent.TimeUnit
@@ -69,8 +68,8 @@ class PlaceAutocompleteAdapter(private val context: Context,
                            val googleApiClient: GoogleApiClient) :
             RecyclerView.ViewHolder(itemView){
 
-        val primaryText = itemView.rootView.findViewById<TextView>(android.R.id.text1)
-        val secondaryText = itemView.rootView.findViewById<TextView>(android.R.id.text2)
+        val primaryText = itemView.rootView.findViewById<TextView>(R.id.text1)
+        val secondaryText = itemView.rootView.findViewById<TextView>(R.id.text2)
 
         fun setPlace(primary: String, secondary: String, placeId: String){
             primaryText.text = primary
@@ -81,7 +80,7 @@ class PlaceAutocompleteAdapter(private val context: Context,
             }
         }
 
-        fun getLatLng(placeId: String){
+        private fun getLatLng(placeId: String){
             val placeBufferResults : PendingResult<PlaceBuffer> = Places.GeoDataApi
                     .getPlaceById(googleApiClient, placeId)
 
@@ -97,22 +96,22 @@ class PlaceAutocompleteAdapter(private val context: Context,
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): PlaceAutocompleteAdapter.PlacesViewHolder {
         val itemView = LayoutInflater.from(parent?.context)
-                .inflate(android.R.layout.simple_expandable_list_item_2,
+                .inflate(R.layout.custom_expadable_list_item,
                         parent, false)
 
         return PlaceAutocompleteAdapter.PlacesViewHolder(itemView, callback, googleApiClient)
     }
 
     override fun onBindViewHolder(holder: PlaceAutocompleteAdapter.PlacesViewHolder?, position: Int) {
-        holder?.setPlace(getPrimaryString(position), getSecondaryString(position), getPlaceId(position))
+        holder?.setPlace(getPrimaryText(position), getSecondaryText(position), getPlaceId(position))
 
     }
 
-    private fun getPrimaryString(position: Int) : String{
+    private fun getPrimaryText(position: Int) : String{
         return mResultList!![position].getPrimaryText(STYLE_BOLD).toString()
     }
 
-    private fun getSecondaryString(position: Int) : String{
+    private fun getSecondaryText(position: Int) : String{
         return mResultList!![position].getSecondaryText(STYLE_BOLD).toString()
     }
 
@@ -133,6 +132,8 @@ class PlaceAutocompleteAdapter(private val context: Context,
     override fun getFilter(): Filter {
         return object : Filter() {
             override fun performFiltering(constraint: CharSequence?): Filter.FilterResults {
+                callback.onLoading(true)
+
                 val results = Filter.FilterResults()
                 // Skip the autocomplete query if no constraints are given.
                 if (constraint != null) {
@@ -143,7 +144,6 @@ class PlaceAutocompleteAdapter(private val context: Context,
                         results.values = mResultList
                         results.count = mResultList!!.size
 
-                        Log.d("tag of adap", mResultList?.size.toString())
                     }
                 }
                 return results
@@ -151,14 +151,15 @@ class PlaceAutocompleteAdapter(private val context: Context,
 
             override fun publishResults(constraint: CharSequence, results: Filter.FilterResults?) {
 
-
                 if (results != null && results.count > 0) {
                     // The API returned at least one result, update the data.
                     notifyDataSetChanged()
                 } else {
                     // The API did not return any results, invalidate the data set.
-                    //notifyDataSetInvalidated()
+                    //notifyDataSetChanged()
                 }
+
+                callback.onLoading(false)
             }
 
             override fun convertResultToString(resultValue: Any): CharSequence {
@@ -190,7 +191,7 @@ class PlaceAutocompleteAdapter(private val context: Context,
      * @see AutocompletePrediction.freeze
      */
     private fun getAutocomplete(constraint: CharSequence): ArrayList<AutocompletePrediction>? {
-        if (googleApiClient.isConnected()) {
+        if (googleApiClient.isConnected) {
             Log.i(TAG, "Starting autocomplete query for: " + constraint)
 
             // Submit the query to the autocomplete API and retrieve a PendingResult that will
@@ -210,6 +211,8 @@ class PlaceAutocompleteAdapter(private val context: Context,
             if (!status.isSuccess) {
                 Toast.makeText(context, "Error contacting API: " + status.toString(),
                         Toast.LENGTH_SHORT).show()
+
+                status.statusCode
                 Log.e(TAG, "Error getting autocomplete prediction API call: " + status.toString())
                 autocompletePredictions.release()
                 return null

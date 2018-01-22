@@ -9,14 +9,18 @@ import com.google.android.gms.maps.model.LatLngBounds
  */
 open class PlacesSearchDialogBuilder(private val context: Context) {
 
-    val CITIES = AutocompleteFilter.TYPE_FILTER_CITIES
-    val ESTABLISHMENTS = AutocompleteFilter.TYPE_FILTER_ESTABLISHMENT
-    val ADDRESSES = AutocompleteFilter.TYPE_FILTER_ADDRESS
+    private val CITIES = AutocompleteFilter.TYPE_FILTER_CITIES
+    private val ESTABLISHMENTS = AutocompleteFilter.TYPE_FILTER_ESTABLISHMENT
+    private val ADDRESSES = AutocompleteFilter.TYPE_FILTER_ADDRESS
+    private val REGION = AutocompleteFilter.TYPE_FILTER_REGIONS
 
-    var latLngBounds: LatLngBounds? = null
-    var locationSelectedListener: SimplePlacesSearchDialog.LocationSelectedCallback? = null
-    var searchFilter: AutocompleteFilter = AutocompleteFilter.Builder()
-            .setTypeFilter(AutocompleteFilter.TYPE_FILTER_NONE).build()
+    private var searchFilterType = AutocompleteFilter.TYPE_FILTER_NONE
+
+    internal var searchHint: String = context.getString(R.string.search_hint)
+    internal var latLngBounds: LatLngBounds? = null
+    internal var locationSelectedListener: SimplePlacesSearchDialog.LocationSelectedCallback? = null
+    internal var searchFilter: AutocompleteFilter = AutocompleteFilter.Builder().setTypeFilter(searchFilterType).build()
+
 
     fun setLatLngBounds(latLngBounds: LatLngBounds) : PlacesSearchDialogBuilder {
         this.latLngBounds = latLngBounds
@@ -29,14 +33,15 @@ open class PlacesSearchDialogBuilder(private val context: Context) {
     fun setResultsFilter(filter: Int): PlacesSearchDialogBuilder{
 
         when(filter) {
-            CITIES -> this.searchFilter = AutocompleteFilter.Builder()
-                    .setTypeFilter(CITIES).build()
+            CITIES -> this.searchFilterType = CITIES
 
-            ESTABLISHMENTS -> this.searchFilter = AutocompleteFilter.Builder()
-                    .setTypeFilter(AutocompleteFilter.TYPE_FILTER_ESTABLISHMENT).build()
+            ESTABLISHMENTS -> this.searchFilterType = ESTABLISHMENTS
 
-            ADDRESSES -> this.searchFilter = AutocompleteFilter.Builder()
-                    .setTypeFilter(AutocompleteFilter.TYPE_FILTER_ADDRESS).build()
+            ADDRESSES -> this.searchFilterType = ADDRESSES
+
+            REGION -> this.searchFilterType = REGION
+
+            else -> this.searchFilterType = AutocompleteFilter.TYPE_FILTER_NONE
         }
 
         return this

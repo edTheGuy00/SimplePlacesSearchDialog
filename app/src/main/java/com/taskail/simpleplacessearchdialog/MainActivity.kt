@@ -17,7 +17,6 @@ class MainActivity : AppCompatActivity() {
 
         locationBtn.setOnClickListener {
             PlacesSearchDialogBuilder(this)
-                    .setResultsFilter(AutocompleteFilter.TYPE_FILTER_ESTABLISHMENT)
                     .setLocationListener(object : SimplePlacesSearchDialog.LocationSelectedCallback{
                         override fun onLocationSelected(place: Place) {
 
