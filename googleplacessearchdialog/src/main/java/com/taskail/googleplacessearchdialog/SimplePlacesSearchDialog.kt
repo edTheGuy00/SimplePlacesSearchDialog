@@ -4,6 +4,8 @@ import android.content.Context
 import android.os.Bundle
 import android.support.v7.app.AppCompatDialog
 import android.support.v7.widget.AppCompatEditText
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -22,16 +24,22 @@ import com.google.android.gms.maps.model.LatLngBounds
 class SimplePlacesSearchDialog(private val mContext: Context,
                                private var builder: PlacesSearchDialogBuilder) :
         AppCompatDialog(mContext), GoogleApiClient.OnConnectionFailedListener,
-        GoogleApiClient.ConnectionCallbacks, FilterCallbacks {
+        GoogleApiClient.ConnectionCallbacks {
 
 
     private val tag = "Places Search Dialog"
     // Bounds of the world
     private var BOUNDS_WORLD = LatLngBounds(LatLng(-85.0, 180.0), LatLng(85.0, -180.0))
 
+    private var THRESH_HOLD = 2
+
     private var list = ArrayList<AutocompletePrediction>()
 
     private lateinit var googleApiClient: GoogleApiClient
+
+    private var recyclerView: RecyclerView? = null
+
+
 
     interface LocationSelectedCallback{
         fun onLocationSelected(locationName: String,
@@ -42,6 +50,8 @@ class SimplePlacesSearchDialog(private val mContext: Context,
     init {
         setContentView(R.layout.dialog_simple_search)
         window.setBackgroundDrawableResource(android.R.color.transparent)
+
+        recyclerView = findViewById(R.id.recyclerView)
 
         if (builder.latLngBounds != null) {
             BOUNDS_WORLD = builder.latLngBounds!!
@@ -68,8 +78,11 @@ class SimplePlacesSearchDialog(private val mContext: Context,
 
     private fun initDialog(){
 
-        val autoCompletePredictions = GoogleAutoCompletePredictions(googleApiClient, BOUNDS_WORLD, mContext)
-        val filter = SimpleSearchFilter(list, autoCompletePredictions, this)
+        val adapter = PlaceAutocompleteAdapter(mContext, googleApiClient, BOUNDS_WORLD, builder.searchFilter)
+
+        recyclerView?.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+
+        recyclerView?.adapter = adapter
 
         getInputET().addTextChangedListener(object : TextWatcher{
             override fun afterTextChanged(p0: Editable?) {
@@ -80,18 +93,12 @@ class SimplePlacesSearchDialog(private val mContext: Context,
             }
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                filter.filter(p0)
+                if(p0!!.length > THRESH_HOLD)
+                adapter.filter.filter(p0)
             }
 
         })
 
-    }
-
-    override fun publishResults() {
-
-    }
-
-    override fun noResultsReturned() {
     }
 
     private fun getInputET() : AppCompatEditText{
