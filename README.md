@@ -3,7 +3,10 @@ Simple Places Search Dialog
 
 A minimal and simple Google places autocomplete search dialog.
 
-![](images/image1.png) ![](images/image2.png) ![](images/image3.png)
+
+:-------------------------:|:-------------------------:|:-------------------------:
+![](images/image1.png)     |  ![](images/image2.png)   |  ![](images/image3.png)
+
 
 ## Setup
 
