@@ -17,7 +17,7 @@ Add this repository to you app's build.gradle file
 
 ```groovy
 dependencies {
-
+    implementation 'com.taskail:simple-places-search-dialog:1.0'
 }
 ```
 
@@ -38,9 +38,9 @@ Simple Usage
              @Override
              public void onPlaceSelected(@NotNull Place place) {
 
-             textView.setText(place.getName())
+                    textView.setText(place.getName())
 
-             latitude = place.getLatLng().latitude
+                    latitude = place.getLatLng().latitude
 
              }
          }).build();
@@ -89,9 +89,9 @@ Customization
              @Override
              public void onPlaceSelected(@NotNull Place place) {
 
-             textView.setText(place.getName())
+                    textView.setText(place.getName())
 
-             latitude = place.getLatLng().latitude
+                    latitude = place.getLatLng().latitude
 
              }
          }).build();
