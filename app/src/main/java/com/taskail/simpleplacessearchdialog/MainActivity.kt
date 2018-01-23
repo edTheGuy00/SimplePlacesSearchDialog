@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity() {
                     //Filter for cities only
                     .setResultsFilter(AutocompleteFilter.TYPE_FILTER_CITIES)
                     // enter a custom hint
-                    .setSearchHint("search hint")
+                    .setSearchHint("Enter Location...")
                     // enter bounds, Mountain View California in this case
                     .setLatLngBounds(MT_VIEW_CALIFORNIA)
                     //set the place selected callback
